@@ -13,7 +13,7 @@ export function useSearch(debounceMs: number = 300) {
   const [results, setResults] = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const searchHotels = useCallback(async (searchQuery: string) => {
     if (searchQuery.length < 2) {
