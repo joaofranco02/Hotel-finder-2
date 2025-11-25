@@ -1,36 +1,276 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏨 Hotel Finder - Frontend
 
-## Getting Started
+Frontend Next.js 14 para o sistema de busca de hotéis.
 
-First, run the development server:
+## 🚀 Início Rápido
+
+### 1. Instalar Dependências
+
+```bash
+npm install
+# ou
+pnpm install
+# ou
+yarn install
+```
+
+### 2. Configurar Variáveis de Ambiente
+
+O arquivo `.env` já está configurado com:
+
+```env
+# API Configuration
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_V1=/api/v1
+```
+
+### 3. Iniciar Backend
+
+**IMPORTANTE:** O backend deve estar rodando antes de iniciar o frontend.
+
+```bash
+# Em outro terminal, navegue até Back-end/
+cd ../Back-end
+
+# Ative o ambiente virtual
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # Linux/Mac
+
+# Inicie o servidor
+uvicorn app.main:app --reload
+```
+
+O backend estará disponível em `http://localhost:8000`
+
+### 4. Iniciar Frontend
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
+# ou
 pnpm dev
-# or
-bun dev
+# ou
+yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse: http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📦 Estrutura
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/                    # App Router (Next.js 14)
+│   ├── page.tsx           # Página inicial
+│   ├── layout.tsx         # Layout global
+│   └── globals.css        # Estilos globais
+├── components/            # Componentes React
+│   ├── Header.tsx         # Cabeçalho
+│   ├── HotelCard.tsx      # Card de hotel
+│   ├── SearchForm.tsx     # Formulário de busca
+│   └── QuickSearch.tsx    # Busca rápida
+├── hooks/                 # Custom Hooks
+│   ├── useHotels.ts       # Hook para buscar hotéis
+│   ├── useSearch.ts       # Hook para busca com debounce
+│   └── useFilters.ts      # Hook para filtros
+├── lib/                   # Bibliotecas
+│   └── api.ts            # Cliente API
+└── types/                 # TypeScript types
+    └── hotel.ts          # Tipos de Hotel
+```
 
-## Learn More
+## 🔌 API Client
 
-To learn more about Next.js, take a look at the following resources:
+O cliente da API está configurado em `src/lib/api.ts`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```typescript
+import { apiClient } from '@/lib/api';
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+// Buscar todos os hotéis
+const { results, total } = await apiClient.getHotels();
 
-## Deploy on Vercel
+// Buscar com filtros
+const filtered = await apiClient.getHotels({
+  cidade: 'Lisboa',
+  max_price: 200
+});
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+// Buscar por ID
+const hotel = await apiClient.getHotelById(1);
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+// Busca rápida
+const search = await apiClient.searchHotels('Plaza');
+```
+
+## 🎣 Hooks Customizados
+
+### useHotels
+
+Busca hotéis com filtros:
+
+```typescript
+import { useHotels } from '@/hooks/useHotels';
+
+function MyComponent() {
+  const { hotels, total, loading, error } = useHotels({
+    cidade: 'Lisboa',
+    max_price: 200
+  });
+
+  if (loading) return <div>Carregando...</div>;
+  if (error) return <div>Erro: {error.message}</div>;
+
+  return (
+    <div>
+      {hotels.map(hotel => (
+        <div key={hotel.id}>{hotel.nome}</div>
+      ))}
+    </div>
+  );
+}
+```
+
+### useSearch
+
+Busca com debounce:
+
+```typescript
+import { useSearch } from '@/hooks/useSearch';
+
+function SearchBar() {
+  const { query, setQuery, results, loading } = useSearch();
+
+  return (
+    <input
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+      placeholder="Buscar..."
+    />
+  );
+}
+```
+
+### useFilters
+
+Busca filtros disponíveis:
+
+```typescript
+import { useFilters } from '@/hooks/useFilters';
+
+function Filters() {
+  const { cities, priceRange, loading } = useFilters();
+
+  return (
+    <select>
+      {cities.map(city => (
+        <option key={city}>{city}</option>
+      ))}
+    </select>
+  );
+}
+```
+
+## 🎨 Componentes
+
+### HotelCard
+
+Exibe informações de um hotel:
+
+```typescript
+<HotelCard hotel={hotel} />
+```
+
+### SearchForm
+
+Formulário de busca com filtros:
+
+```typescript
+<SearchForm onSearch={(params) => console.log(params)} />
+```
+
+### QuickSearch
+
+Busca rápida com autocomplete:
+
+```typescript
+<QuickSearch />
+```
+
+## 🔧 Configuração Avançada
+
+### Alterar URL da API
+
+Edite o arquivo `.env`:
+
+```env
+NEXT_PUBLIC_API_URL=https://sua-api.com
+NEXT_PUBLIC_API_V1=/api/v1
+```
+
+### Timeout de Requisições
+
+Modifique `src/lib/api.ts` para adicionar timeout:
+
+```typescript
+const response = await fetch(url, {
+  signal: AbortSignal.timeout(5000) // 5 segundos
+});
+```
+
+## 🐛 Troubleshooting
+
+### Erro: "Failed to fetch"
+
+1. Verifique se o backend está rodando
+2. Verifique a URL em `.env`
+3. Verifique CORS no backend
+
+### Erro: "Cannot find module"
+
+```bash
+# Reinstale as dependências
+rm -rf node_modules
+npm install
+```
+
+### Backend não responde
+
+```bash
+# Verifique se o backend está rodando
+curl http://localhost:8000/health
+
+# Se não responder, inicie o backend
+cd ../Back-end
+uvicorn app.main:app --reload
+```
+
+## 📚 Recursos
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev)
+- [Tailwind CSS](https://tailwindcss.com)
+- [TypeScript](https://www.typescriptlang.org)
+
+## 🚀 Deploy
+
+### Vercel (Recomendado)
+
+```bash
+# Instalar Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+```
+
+### Build para Produção
+
+```bash
+npm run build
+npm start
+```
+
+## 📝 Scripts Disponíveis
+
+- `npm run dev` - Inicia servidor de desenvolvimento
+- `npm run build` - Cria build de produção
+- `npm start` - Inicia servidor de produção
+- `npm run lint` - Executa linter

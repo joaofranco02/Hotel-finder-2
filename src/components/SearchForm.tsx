@@ -1,21 +1,30 @@
 "use client";
 import { useState } from "react";
+import type { SearchParams } from "@/types/hotel";
 
 export default function SearchForm({
   onSearch,
 }: {
-  onSearch?: (q: any) => void;
+  onSearch?: (params: SearchParams) => void;
 }) {
   const [location, setLocation] = useState("");
   const [checkin, setCheckin] = useState("");
   const [checkout, setCheckout] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    const payload = { location, checkin, checkout };
-    if (onSearch) onSearch(payload);
-    // For now show a simple feedback during dev
-    alert(`Procurando hotéis em ${location || "qualquer lugar"}`);
+
+    const searchParams: SearchParams = {
+      search: location || undefined,
+      min_price: minPrice ? Number(minPrice) : undefined,
+      max_price: maxPrice ? Number(maxPrice) : undefined,
+    };
+
+    if (onSearch) {
+      onSearch(searchParams);
+    }
   }
 
   return (
