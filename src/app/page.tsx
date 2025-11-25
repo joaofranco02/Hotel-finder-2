@@ -8,7 +8,16 @@ import type { SearchParams } from "@/types/hotel";
 
 export default function Home() {
   const [searchParams, setSearchParams] = useState<SearchParams>({});
-  const { hotels, total, loading, error } = useHotels(searchParams);
+  const { hotels, total, loading, useMock } = useHotels(searchParams);
+
+  console.log('🏠 PAGE - Estado atual:', {
+    searchParams,
+    totalHotels: total,
+    hotelsCount: hotels.length,
+    loading,
+    useMock,
+    primeiroHotel: hotels[0]?.nome
+  });
 
   const scrollToSearch = () => {
     const searchSection = document.getElementById("search-section");
@@ -18,6 +27,7 @@ export default function Home() {
   };
 
   const handleSearch = (params: SearchParams) => {
+    console.log('🔎 PAGE - Nova busca:', params);
     setSearchParams(params);
     // Scroll to results
     setTimeout(() => {
@@ -64,7 +74,7 @@ export default function Home() {
 
         {/* Search Section */}
         <section id="search-section" className="mb-8 scroll-mt-20">
-          <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+          <h3 className="text-2xl font-semibold text-black mb-4">
             Comece sua busca
           </h3>
           <SearchForm onSearch={handleSearch} />
@@ -73,18 +83,32 @@ export default function Home() {
         {/* Hotels Section */}
         <section id="hotels-section">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-semibold text-gray-900">
+            <h3 className="text-2xl font-semibold text-black">
               {searchParams.search || searchParams.cidade
                 ? "Resultados da busca"
                 : "Hotéis disponíveis"}
             </h3>
             {total > 0 && (
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-black">
                 {total}{" "}
                 {total === 1 ? "hotel encontrado" : "hotéis encontrados"}
               </span>
             )}
           </div>
+
+          {/* Mock Data Warning */}
+          {useMock && !loading && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+              <div className="flex items-center gap-2">
+                <svg className="h-5 w-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <p className="text-sm text-yellow-800">
+                  <strong>API não conectada.</strong> Mostrando dados de exemplo. Para ver dados reais, inicie o backend em <code className="bg-yellow-100 px-1 rounded">http://localhost:8000</code>
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Loading State */}
           {loading && (
@@ -94,24 +118,8 @@ export default function Home() {
             </div>
           )}
 
-          {/* Error State */}
-          {error && !loading && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-              <p className="text-red-600 font-semibold mb-2">
-                Erro ao carregar hotéis
-              </p>
-              <p className="text-red-500 text-sm">{error.message}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition"
-              >
-                Tentar novamente
-              </button>
-            </div>
-          )}
-
           {/* Empty State */}
-          {!loading && !error && hotels.length === 0 && (
+          {!loading && hotels.length === 0 && (
             <div className="text-center py-12 bg-white rounded-lg shadow-md">
               <svg
                 className="mx-auto h-12 w-12 text-gray-400"
@@ -136,7 +144,7 @@ export default function Home() {
           )}
 
           {/* Hotels List */}
-          {!loading && !error && hotels.length > 0 && (
+          {!loading && hotels.length > 0 && (
             <div className="grid gap-4">
               {hotels.map((hotel) => (
                 <HotelCard key={hotel.id} hotel={hotel} />

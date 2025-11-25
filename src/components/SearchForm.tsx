@@ -11,7 +11,6 @@ export default function SearchForm({
   const [checkin, setCheckin] = useState("");
   const [checkout, setCheckout] = useState("");
   const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -19,7 +18,6 @@ export default function SearchForm({
     const searchParams: SearchParams = {
       search: location || undefined,
       min_price: minPrice ? Number(minPrice) : undefined,
-      max_price: maxPrice ? Number(maxPrice) : undefined,
     };
 
     if (onSearch) {
@@ -30,17 +28,17 @@ export default function SearchForm({
   return (
     <form
       onSubmit={submit}
-      className="w-full bg-white rounded-xl shadow-md p-6"
+      className="w-full bg-white rounded-xl shadow-md p-6 text-black"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-600 mb-1">
+          <label className="block text-sm font-medium text-black mb-1">
             Local
           </label>
           <input
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            placeholder="Cidade ou hotel"
+            placeholder="Cidade, bairro ou hotel"
             className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#007A4D] focus:border-transparent transition"
           />
         </div>
@@ -68,6 +66,20 @@ export default function SearchForm({
               className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#007A4D] focus:border-transparent transition"
             />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Preço Mínimo
+          </label>
+          <input
+            type="number"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            placeholder="R$ 150"
+            min="0"
+            className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#007A4D] focus:border-transparent transition"
+          />
         </div>
 
         <div className="sm:w-48">
